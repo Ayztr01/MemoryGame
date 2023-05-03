@@ -76,6 +76,7 @@ namespace MemoryGame
             this.txtPlayerName.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             this.txtPlayerName.DoubleClick += new System.EventHandler(this.textBox1_TextChanged);
             this.txtPlayerName.Enter += new System.EventHandler(this.textBox1_TextChanged);
+            this.txtPlayerName.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtPlayerName_KeyPress);
             this.txtPlayerName.MouseEnter += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // lblMemoryGame

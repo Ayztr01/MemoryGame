@@ -27,6 +27,24 @@ namespace MemoryGame
 
         protected void button2_Click(object sender, EventArgs e)
         {
+            StartToPlay();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtPlayerName_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (Int32)Keys.Enter)
+            {
+                StartToPlay();
+            }
+        }
+
+        private void StartToPlay()
+        {
             // Check user's input is correct according to Regexes
             if (letters_numbers.IsMatch(txtPlayerName.Text))
             {
@@ -47,11 +65,6 @@ namespace MemoryGame
                 // Erase the text from the textboxes
                 txtPlayerName.Text = "";
             }
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
