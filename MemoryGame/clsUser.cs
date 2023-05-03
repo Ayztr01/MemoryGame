@@ -1,48 +1,51 @@
-﻿using System.Windows.Forms;
+using System.Windows.Forms;
 using System.Data.OleDb;
 using System;
 using System.Media;
+using Models;
+using Repository;
 
 namespace MemoryGame
 {
     class clsUser
     {
-      
+        private UserRepository _userRepository;
+
         OleDbConnection conn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=Memory.mdb;");
         SoundPlayer player = new SoundPlayer("error_sound.wav");
 
         bool flag = false;
         int time = -1;
 
-        internal clsUser()
+        public clsUser(UserRepository userRepository)
         {
-
+            _userRepository = userRepository;
         }
-        void updateDB(int tries,int time,string name)
+        void updateDB(int tries, int time, string name)
         {
-                try
-                {
-                    conn.Open();
-                    OleDbCommand command1 = new OleDbCommand("UPDATE Users SET Tries=@tries,TimeInSec=@time WHERE Username=@name;", conn);
-                    command1.Parameters.AddWithValue("@tries", tries);
-                    command1.Parameters.AddWithValue("@time", time);
-                    command1.Parameters.AddWithValue("@name", name);
+            try
+            {
+                conn.Open();
+                OleDbCommand command1 = new OleDbCommand("UPDATE Users SET Tries=@tries,TimeInSec=@time WHERE Username=@name;", conn);
+                command1.Parameters.AddWithValue("@tries", tries);
+                command1.Parameters.AddWithValue("@time", time);
+                command1.Parameters.AddWithValue("@name", name);
 
-                    command1.Connection = conn;
-                    command1.ExecuteNonQuery(); 
+                command1.Connection = conn;
+                command1.ExecuteNonQuery();
 
-                }
-                catch (Exception e)
-                {
-                    player.Play();
-                    MessageBox.Show("Problem with the database!");
-                    MessageBox.Show(e.Message);
-                }
-                finally
-                {
-                    conn.Close(); 
-                }
-            
+            }
+            catch (Exception e)
+            {
+                player.Play();
+                MessageBox.Show("Problem with the database!");
+                MessageBox.Show(e.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
         }
 
         void readFromDb(string name)
@@ -53,7 +56,7 @@ namespace MemoryGame
                 OleDbCommand command = new OleDbCommand("SELECT TimeInSec FROM Users WHERE Username=@user;", conn);
                 command.Parameters.AddWithValue("@user", name);
 
-              
+
                 OleDbDataReader reader = command.ExecuteReader();
 
                 if (reader.HasRows)
@@ -62,7 +65,7 @@ namespace MemoryGame
 
                     while (reader.Read())
                     {
-                        this.time = reader.GetInt16(0); 
+                        this.time = reader.GetInt16(0);
                     }
 
                     reader.Close();
@@ -70,15 +73,15 @@ namespace MemoryGame
             }
 
             catch (Exception e)
-            
+
             {
-                player.Play(); 
+                player.Play();
                 MessageBox.Show("Problem with the database!");
                 MessageBox.Show(e.Message);
             }
 
             finally
-            
+
             {
                 conn.Close();
             }
@@ -86,50 +89,53 @@ namespace MemoryGame
 
         void addToDB(string name, int tries, int time)
         {
-                try
+            try
+            {
+                conn.Open();
+                OleDbCommand cmd = new OleDbCommand();
+
+                cmd.CommandText = @"INSERT INTO Users (Username,Tries,TimeInSec) VALUES (@userName,@tries,@time)";
+
+                cmd.Parameters.AddWithValue("@userName", name);
+                cmd.Parameters.AddWithValue("@tries", tries);
+                cmd.Parameters.AddWithValue("@time", time);
+
+                cmd.Connection = conn;
+
+                int i = cmd.ExecuteNonQuery();
+
+                if (i != 1)
                 {
-                    conn.Open(); 
-                    OleDbCommand cmd = new OleDbCommand();
-
-                    cmd.CommandText = @"INSERT INTO Users (Username,Tries,TimeInSec) VALUES (@userName,@tries,@time)";
-
-                    cmd.Parameters.AddWithValue("@userName", name);
-                    cmd.Parameters.AddWithValue("@tries", tries);
-                    cmd.Parameters.AddWithValue("@time", time);
-
-                    cmd.Connection = conn;
-
-                    int i = cmd.ExecuteNonQuery();
-
-                    if (i != 1) 
-                    {
-                        MessageBox.Show("The Database was not updated!");
-                    }
+                    MessageBox.Show("The Database was not updated!");
                 }
-                catch (Exception ex) 
-                {
-                    player.Play(); 
+            }
+            catch (Exception ex)
+            {
+                player.Play();
 
-                    MessageBox.Show("A problem with the database occured!");
-                    MessageBox.Show(ex.Message);
-                }
-                finally
-                {
-                    conn.Close();
-                }
-            
+                MessageBox.Show("A problem with the database occured!");
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+            }
+
         }
 
         internal void databaseOperations(string name, int tries, int time)
         {
             readFromDb(name);
 
-            if (flag == true) 
+            User user = new User(name, tries, time);
+
+            if (flag == true)
             {
-              
+
                 if (this.time >= time)
                 {
-                    updateDB(tries, time, name);
+                    //updateDB(tries, time, name);
+                    _userRepository.UpdateDB(user);
                 }
             }
             else

@@ -5,6 +5,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Media;
 
+using Repository;
+
 namespace MemoryGame
 {
     public partial class GameArea : Form
@@ -245,7 +247,7 @@ namespace MemoryGame
 
                 MessageBox.Show("Congratulations!"); 
              
-                new clsUser().databaseOperations(name, tries, time); 
+                new clsUser(new UserRepository()).databaseOperations(name, tries, time); 
 
                
                 Results results = new Results(name, tries.ToString(), time.ToString());
